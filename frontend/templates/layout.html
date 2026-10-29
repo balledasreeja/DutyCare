@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "macros.html" import logo, role_badge, flashes %}
+
+{% block body %}
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      {{ logo(34, true) }}
+      <div class="sidebar-area">{{ area }}</div>
+    </div>
+    <nav class="sidebar-nav">
+      {% for endpoint, label, icon in nav_links %}
+      <a href="{{ url_for(endpoint) }}" class="nav-link {{ 'active' if active_nav == endpoint }}">
+        <span class="nav-icon">{{ icon }}</span>{{ label }}
+      </a>
+      {% endfor %}
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar">{{ current_user.name|initials }}</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">{{ current_user.name }}</div>
+        {{ role_badge(current_user.role) }}
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1>{{ self.title() }}</h1>
+      <div class="topbar-right">
+        <span class="muted">{{ current_user.email }}</span>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <button class="btn btn-ghost">Log out</button>
+        </form>
+      </div>
+    </header>
+    <main class="content">
+      {{ flashes() }}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

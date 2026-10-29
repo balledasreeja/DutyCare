@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% from "macros.html" import status_badge %}
+{% block title %}My Requests{% endblock %}
+
+{% block content %}
+{% set TYPES = {"swap": "Swap", "leave": "Leave", "issue": "Issue"} %}
+<div class="card">
+  <div class="card-head">
+    <h2>Your requests</h2>
+    <a class="btn btn-primary" href="{{ url_for('staff.new_request') }}">+ New request</a>
+  </div>
+  <table class="table">
+    <thead>
+      <tr><th>Sent</th><th>Type</th><th>Duty</th><th>Message</th><th>Status</th><th>Admin response</th></tr>
+    </thead>
+    <tbody>
+      {% for r in requests %}
+      <tr>
+        <td class="nowrap">{{ r.created_at|when }}</td>
+        <td>{{ TYPES[r.type] }}</td>
+        <td>{{ r.shift.label if r.shift else "General" }}</td>
+        <td class="message-cell">{{ r.message or "—" }}</td>
+        <td>{{ status_badge(r.status) }}</td>
+        <td class="message-cell">{{ r.admin_note or "—" }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="empty">
+          No requests yet. To change a specific duty, use "Raise issue / swap" on the My Duties page.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

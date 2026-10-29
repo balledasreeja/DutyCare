@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% from "macros.html" import role_badge %}
+{% block title %}Users{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-head">
+    <form method="get" class="toolbar">
+      <input type="hidden" name="role" value="{{ role }}" />
+      <input class="search" name="q" value="{{ q }}" placeholder="Search name, email, department…" />
+      <button class="btn btn-light">Search</button>
+    </form>
+    <div class="toolbar">
+      <div class="segmented">
+        {% for r, label in [("all", "All"), ("doctor", "Doctors"), ("nurse", "Nurses"), ("admin", "Admins")] %}
+        <a class="{{ 'active' if role == r }}" href="{{ url_for('admin.users', role=r, q=q or None) }}">{{ label }}</a>
+        {% endfor %}
+      </div>
+      <a class="btn btn-primary" href="{{ url_for('admin.user_form') }}">+ Add user</a>
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Phone</th><th>Status</th>
+        <th class="right">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr class="{{ 'inactive' if not u.active }}">
+        <td class="strong">{{ u.name }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ role_badge(u.role) }}</td>
+        <td>{{ u.department or "—" }}</td>
+        <td>{{ u.phone or "—" }}</td>
+        <td>
+          <span class="badge {{ 'status-approved' if u.active else 'status-rejected' }}">{{ "Active" if u.active else "Inactive" }}</span>
+        </td>
+        <td class="right nowrap actions">
+          {% if u.role != "admin" %}
+          <a class="btn btn-light btn-sm" href="{{ url_for('admin.user_availability', user_id=u.id) }}">Availability</a>
+          {% endif %}
+          <a class="btn btn-light btn-sm" href="{{ url_for('admin.user_form', user_id=u.id) }}">Edit</a>
+          {% if u.id != current_user.id %}
+          <form method="post" action="{{ url_for('admin.toggle_user', user_id=u.id) }}">
+            <input type="hidden" name="active" value="{{ '0' if u.active else '1' }}" />
+            <button class="btn btn-light btn-sm">{{ "Deactivate" if u.active else "Activate" }}</button>
+          </form>
+          <form method="post" action="{{ url_for('admin.delete_user', user_id=u.id) }}"
+                onsubmit="return confirm('Delete this user? Their duties and requests will also be removed.')">
+            <button class="btn btn-danger-light btn-sm">Delete</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="empty">No users match.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% from "macros.html" import period_badge, status_badge %}
+{% block title %}My Duties{% endblock %}
+
+{% block content %}
+<div class="welcome">
+  <h2>Hello, {{ current_user.name }}</h2>
+  <p class="muted">
+    {% if not upcoming %}You have no upcoming duties.
+    {% else %}You have {{ upcoming|length }} upcoming {{ "duties" if upcoming|length > 1 else "duty" }}{% if pending %}, {{ pending }} waiting for you to accept{% endif %}.
+    {% endif %}
+  </p>
+</div>
+
+{% if not upcoming %}
+<div class="card empty-card">
+  <p>Nothing scheduled yet. Keep your <a href="{{ url_for('staff.availability') }}">availability</a> up to date so
+    the admin can assign you.</p>
+</div>
+{% endif %}
+
+<div class="duty-grid">
+  {% for d in upcoming %}
+  <div class="duty-card period-border-{{ d.shift.period|lower }}">
+    <div class="duty-date">{{ d.shift.date|day }}</div>
+    <div class="duty-row">{{ period_badge(d.shift.period) }}<span class="muted small">{{ times[d.shift.period] }}</span></div>
+    <div class="duty-ward">{{ d.shift.ward }}</div>
+    <div class="duty-row"><span class="muted small">Slot {{ d.slot_label }}</span>{{ status_badge(d.status) }}</div>
+    <div class="duty-actions">
+      {% if d.status == "assigned" %}
+      <form method="post" action="{{ url_for('staff.accept', assignment_id=d.id) }}">
+        <button class="btn btn-primary btn-sm">Accept</button>
+      </form>
+      {% endif %}
+      {% if d.status != "issue_raised" %}
+      <a class="btn btn-light btn-sm" href="{{ url_for('staff.raise_request', assignment_id=d.id) }}">Raise issue / swap</a>
+      {% else %}
+      <span class="muted small">Waiting for admin decision</span>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if past %}
+<details class="card past">
+  <summary>Past duties ({{ past|length }})</summary>
+  <table class="table compact">
+    <tbody>
+      {% for d in past %}
+      <tr>
+        <td>{{ d.shift.date|day }}</td>
+        <td>{{ period_badge(d.shift.period) }}</td>
+        <td>{{ d.shift.ward }}</td>
+        <td>{{ status_badge(d.status) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</details>
+{% endif %}
+{% endblock %}

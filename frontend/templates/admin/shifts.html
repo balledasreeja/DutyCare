@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% from "macros.html" import date_range, period_badge %}
+{% block title %}Shifts{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-head">
+    {{ date_range(start, end) }}
+    <div class="toolbar">
+      <a class="btn btn-light" href="{{ url_for('admin.shift_bulk') }}">Create for date range</a>
+      <a class="btn btn-primary" href="{{ url_for('admin.shift_form') }}">+ Add shift</a>
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Date</th><th>Period</th><th>Ward</th><th>Doctors needed</th><th>Nurses needed</th>
+        <th class="right">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in shifts %}
+      <tr>
+        <td class="strong">{{ s.date|day }}</td>
+        <td>{{ period_badge(s.period) }}</td>
+        <td>{{ s.ward }}</td>
+        <td>{{ s.doctors_needed }}</td>
+        <td>{{ s.nurses_needed }}</td>
+        <td class="right nowrap actions">
+          <a class="btn btn-light btn-sm" href="{{ url_for('admin.shift_form', shift_id=s.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('admin.delete_shift', shift_id=s.id) }}"
+                onsubmit="return confirm('Delete this shift? Any duties on it will be removed.')">
+            <input type="hidden" name="start" value="{{ start }}" />
+            <input type="hidden" name="end" value="{{ end }}" />
+            <button class="btn btn-danger-light btn-sm">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="empty">No shifts in this date range.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

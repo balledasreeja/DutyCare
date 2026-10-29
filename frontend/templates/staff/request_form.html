@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}{{ "Raise a request" if duty else "New request to admin" }}{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+  {% if duty %}<div class="card-head"><h2>{{ duty.shift.label }}</h2></div>{% endif %}
+  <form method="post" class="pad">
+    <div class="field">
+      <span>Request type</span>
+      <div class="check-row">
+        {% for value, label in [("swap", "Swap duty"), ("leave", "Leave"), ("issue", "Other issue")] %}
+        <label class="chip-toggle radio">
+          <input type="radio" name="type" value="{{ value }}" {{ 'checked' if kind == value }} />{{ label }}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    <label class="field">
+      <span>Message</span>
+      <textarea name="message" rows="4" placeholder="Explain briefly, e.g. reason for the swap or leave">{{ message }}</textarea>
+    </label>
+    <div class="form-actions">
+      <a class="btn btn-ghost" href="{{ url_for('staff.duties' if duty else 'staff.requests') }}">Cancel</a>
+      <button class="btn btn-primary">Send request</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

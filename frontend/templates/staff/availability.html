@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% from "macros.html" import date_range, availability_grid %}
+{% block title %}Availability{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-head">
+    {{ date_range(start, end) }}
+    <span class="muted small">{{ selected }} shift(s) currently marked available</span>
+  </div>
+  <p class="muted small pad">
+    Tick every shift you can work. Each ticked shift becomes an edge in the allocation graph. More ticks give
+    the admin more ways to build a complete roster.
+  </p>
+  <form method="post">
+    <input type="hidden" name="start" value="{{ start }}" />
+    <input type="hidden" name="end" value="{{ end }}" />
+    {{ availability_grid(grid, periods) }}
+    <div class="form-actions pad-all">
+      <button class="btn btn-primary">Save availability</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% macro logo(size=36, light=false) -%}
+<span class="logo">
+  <img src="{{ url_for('static', filename='logo.svg') }}" alt="" width="{{ size }}" height="{{ size }}" />
+  <span class="logo-text {{ 'light' if light }}" style="font-size: {{ (size * 0.62)|round|int }}px">
+    Duty<span class="logo-accent">Care</span>
+  </span>
+</span>
+{%- endmacro %}
+
+{% macro role_badge(role) -%}
+<span class="badge role-{{ role }}">{{ role }}</span>
+{%- endmacro %}
+
+{% macro status_badge(status) -%}
+{% set text = {"assigned": "Assigned", "accepted": "Accepted", "issue_raised": "Issue raised",
+  "open": "Open", "approved": "Approved", "rejected": "Rejected"} %}
+<span class="badge status-{{ status }}">{{ text.get(status, status) }}</span>
+{%- endmacro %}
+
+{% macro period_badge(period) -%}
+<span class="badge period-{{ period|lower }}">{{ period }}</span>
+{%- endmacro %}
+
+{% macro flashes() -%}
+{% for kind, message in get_flashed_messages(with_categories=true) %}
+<div class="notice notice-{{ kind }}">{{ message }}</div>
+{% endfor %}
+{%- endmacro %}
+
+{% macro date_range(start, end, hidden={}) -%}
+<form method="get" class="toolbar">
+  {% for k, v in hidden.items() %}<input type="hidden" name="{{ k }}" value="{{ v }}" />{% endfor %}
+  <label class="field inline"><span>From</span><input type="date" name="start" value="{{ start }}" /></label>
+  <label class="field inline"><span>To</span><input type="date" name="end" value="{{ end }}" /></label>
+  <button class="btn btn-light">Show</button>
+</form>
+{%- endmacro %}
+
+{# Date x period table of checkboxes; ticked boxes are posted as shift_ids. #}
+{% macro availability_grid(grid, periods) -%}
+{% if not grid %}
+<div class="empty">No shifts need this role in these dates yet.</div>
+{% else %}
+<table class="table avail-grid">
+  <thead>
+    <tr><th>Date</th>{% for p in periods %}<th>{{ p }}</th>{% endfor %}</tr>
+  </thead>
+  <tbody>
+    {% for day in grid %}
+    <tr>
+      <td class="nowrap strong">{{ day.date|day }}</td>
+      {% for p in periods %}
+      <td>
+        {% for row in day.cells[p] %}
+        <label class="chip-toggle">
+          <input type="checkbox" name="shift_ids" value="{{ row.shift.id }}" {{ 'checked' if row.available }} />
+          {{ row.shift.ward }}
+        </label>
+        {% else %}<span class="muted">—</span>{% endfor %}
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{%- endmacro %}
+
+{% macro keep_range(start, end, mode) -%}
+<input type="hidden" name="start" value="{{ start }}" />
+<input type="hidden" name="end" value="{{ end }}" />
+<input type="hidden" name="mode" value="{{ mode }}" />
+{%- endmacro %}

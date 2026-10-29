@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "macros.html" import logo, flashes %}
+{% block title %}Sign in{% endblock %}
+
+{% block body %}
+<div class="login-page">
+  <section class="login-hero">
+    {{ logo(56, true) }}
+    <h1>Fair, conflict-free duty rosters.</h1>
+    <p>
+      DutyCare assigns doctors and nurses to shifts using bipartite matching. Every roster respects
+      qualifications and availability, and when a shift can't be covered, Hall's Theorem tells you exactly why.
+    </p>
+    <ul class="hero-points">
+      <li>No double bookings</li>
+      <li>Shortages explained</li>
+      <li>Staff see their duties instantly</li>
+    </ul>
+  </section>
+
+  <section class="login-panel">
+    <form class="login-card" method="post" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+      <h2>Sign in</h2>
+      <p class="muted">Use your hospital email and password.</p>
+      {{ flashes() }}
+      <label class="field">
+        <span>Email</span>
+        <input type="email" name="email" value="{{ email }}" required autofocus />
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" name="password" required />
+      </label>
+      <button class="btn btn-primary btn-block">Sign in</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

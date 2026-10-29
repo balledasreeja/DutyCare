@@ -1,0 +1,174 @@
+{% extends "layout.html" %}
+{% from "macros.html" import period_badge, status_badge, keep_range %}
+{% block title %}Allocate Duties{% endblock %}
+
+{% block content %}
+<div class="card">
+  <form method="post" action="{{ url_for('admin.allocate_run') }}" class="card-head"
+        {% if has_published %}onsubmit="return confirm('Re-running replaces the existing roster in this range, including published duties. Continue?')"{% endif %}>
+    <div class="toolbar">
+      <label class="field inline"><span>From</span><input type="date" name="start" value="{{ start }}" /></label>
+      <label class="field inline"><span>To</span><input type="date" name="end" value="{{ end }}" /></label>
+      <label class="field inline">
+        <span>Rule</span>
+        <select name="mode">
+          <option value="per_day" {{ 'selected' if mode == 'per_day' }}>At most one shift per person per day</option>
+          <option value="whole_range" {{ 'selected' if mode == 'whole_range' }}>At most one shift per person in the whole range (report model)</option>
+        </select>
+      </label>
+      <button class="btn btn-light" formmethod="get" formaction="{{ url_for('admin.allocate') }}">Show roster</button>
+    </div>
+    <button class="btn btn-primary">⇄ Run allocation</button>
+  </form>
+  <p class="muted small pad">
+    Uses Kuhn's augmenting-path algorithm on the staff/shift bipartite graph, separately for doctors and nurses.
+    Shifts that need several people are split into slots (Doc1, Doc2…, Nurse1, Nurse2…).
+  </p>
+</div>
+
+{% if result %}
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-value">{{ result.summary.slots }}</div><div class="stat-label">Slots</div></div>
+  <div class="stat-card good"><div class="stat-value">{{ result.summary.filled }}</div><div class="stat-label">Filled</div></div>
+  <div class="stat-card {{ 'bad' if result.summary.unfilled else 'good' }}">
+    <div class="stat-value">{{ result.summary.unfilled }}</div><div class="stat-label">Unfilled</div>
+  </div>
+  <div class="stat-card"><div class="stat-value">{{ result.summary.unplaced }}</div><div class="stat-label">Staff not placed</div></div>
+</div>
+
+{% if result.summary.unfilled == 0 %}
+<div class="notice notice-success">
+  Every slot is covered: the matching saturates all shift slots. Review the draft below, then publish it.
+</div>
+{% endif %}
+
+{% if result.slot_violators %}
+<div class="notice notice-error block">
+  <h3>Shifts that cannot be fully staffed</h3>
+  <p class="small">
+    Hall's Theorem (from the shift side): a group of B slots can only be filled if at least |B| people are
+    available for them. These groups fail that test, so no roster can cover them.
+  </p>
+  <ul>
+    {% for v in result.slot_violators %}<li><strong>{{ v.group }}:</strong> {{ v.message }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if result.staff_violators %}
+<div class="notice notice-warn block">
+  <h3>Staff who could not all be placed (Hall violators)</h3>
+  <p class="small">
+    Each group A below can cover fewer than |A| slots, so |N(A)| &lt; |A|. This is normal when more people are
+    available than needed. It only matters if everyone in the group must work.
+  </p>
+  <ul>
+    {% for v in result.staff_violators %}<li><strong>{{ v.group }}:</strong> {{ v.message }}</li>{% endfor %}
+  </ul>
+  {% if result.unplaced %}
+  <p class="small">Not placed:
+    {% for u in result.unplaced %}{{ u.name }} ({{ u.group }}){{ ", " if not loop.last }}{% endfor %}
+  </p>
+  {% endif %}
+</div>
+{% endif %}
+{% endif %}
+
+<div class="card">
+  <div class="card-head">
+    <h2>Roster</h2>
+    <form method="post" action="{{ url_for('admin.allocate_publish') }}" class="toolbar">
+      {{ keep_range(start, end, mode) }}
+      {% if drafts %}<span class="muted">{{ drafts }} draft assignment(s) not yet visible to staff</span>{% endif %}
+      <button class="btn btn-accent" {{ 'disabled' if not drafts }}>Publish roster</button>
+    </form>
+  </div>
+
+  {% if not roster %}
+  <div class="empty">No shifts in this date range.</div>
+  {% else %}
+  <table class="table roster">
+    <thead><tr><th>Shift</th><th>Period</th><th>Doctors</th><th>Nurses</th></tr></thead>
+    <tbody>
+      {% for r in roster %}
+      <tr>
+        <td class="strong">{{ r.shift.label }}</td>
+        <td>{{ period_badge(r.shift.period) }}</td>
+        {% for role, people, needed in [("doctor", r.doctors, r.shift.doctors_needed), ("nurse", r.nurses, r.shift.nurses_needed)] %}
+        <td>
+          {% if needed == 0 %}<span class="muted">not needed</span>{% endif %}
+          <div class="chips">
+            {% for a in people %}
+            <span class="chip {{ '' if a.published else 'draft' }}">
+              <span class="chip-slot">{{ a.slot_label }}</span>
+              <a class="link" title="Replace" href="{{ url_for('admin.pick_staff', shift_id=r.shift.id, role=role, assignment_id=a.id, start=start, end=end, mode=mode) }}">{{ a.user.name }}</a>
+              {% if not a.published %}<span class="draft-tag">draft</span>
+              {% elif a.status != "assigned" %}{{ status_badge(a.status) }}{% endif %}
+              <form method="post" action="{{ url_for('admin.remove_assignment', assignment_id=a.id) }}"
+                    onsubmit="return confirm('Remove this person from the shift?')">
+                {{ keep_range(start, end, mode) }}
+                <button class="icon-btn small" title="Remove">×</button>
+              </form>
+            </span>
+            {% endfor %}
+            {% if needed > people|length %}
+            <a class="chip chip-missing" href="{{ url_for('admin.pick_staff', shift_id=r.shift.id, role=role, start=start, end=end, mode=mode) }}">
+              + {{ needed - people|length }} unfilled
+            </a>
+            {% endif %}
+          </div>
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+{% if result and result.layouts %}
+<div class="card">
+  <div class="card-head">
+    <h2>Bipartite graph &amp; augmenting-path steps</h2>
+    <div class="legend">
+      <span><i class="lg-edge"></i> possible</span>
+      <span><i class="lg-chosen"></i> chosen</span>
+      <span><i class="lg-unfilled"></i> unfilled slot</span>
+    </div>
+  </div>
+  {% for g in result.layouts %}
+  <div class="graph-block">
+    <h3 class="graph-title">{{ g.group }} · {{ g.role }}s</h3>
+    <div class="graph-wrap">
+      <svg class="bigraph" viewBox="0 0 900 {{ g.height }}" role="img" aria-label="Bipartite graph">
+        {% for e in g.edges %}
+        <line x1="{{ g.left_x }}" y1="{{ e.y1 }}" x2="{{ g.right_x }}" y2="{{ e.y2 }}" class="edge {{ 'chosen' if e.chosen }}" />
+        {% endfor %}
+        {% for p in g.left %}
+        <circle cx="{{ g.left_x }}" cy="{{ p.y }}" r="15" class="node staff" />
+        <text x="{{ g.left_x - 24 }}" y="{{ p.y + 5 }}" text-anchor="end" class="node-label">{{ p.name }}</text>
+        {% endfor %}
+        {% for s in g.right %}
+        <circle cx="{{ g.right_x }}" cy="{{ s.y }}" r="15" class="node slot {{ '' if s.filled else 'unfilled' }}" />
+        <text x="{{ g.right_x + 24 }}" y="{{ s.y + 5 }}" class="node-label">{{ s.label }}</text>
+        {% endfor %}
+      </svg>
+    </div>
+    <table class="table compact">
+      <thead><tr><th>Step</th><th>Staff</th><th>Result</th><th>Matching after step</th></tr></thead>
+      <tbody>
+        {% for s in result.steps if s.group == g.group and s.role == g.role %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td class="strong">{{ s.staff }}</td>
+          <td><span class="badge {{ 'status-approved' if s.placed else 'status-rejected' }}">{{ "assigned" if s.placed else "no slot" }}</span></td>
+          <td class="small">{% for n, l in s.matching %}{{ n }} → {{ l }}{{ ";  " if not loop.last }}{% endfor %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

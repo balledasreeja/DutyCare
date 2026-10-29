@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}{{ "Replace" if assignment_id else "Add" }} {{ role }}{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+  <div class="card-head"><h2>{{ shift.label }}</h2></div>
+  <form method="post" class="pad">
+    <input type="hidden" name="shift_id" value="{{ shift.id }}" />
+    <input type="hidden" name="role" value="{{ role }}" />
+    {% if assignment_id %}<input type="hidden" name="assignment_id" value="{{ assignment_id }}" />{% endif %}
+    <input type="hidden" name="start" value="{{ start }}" />
+    <input type="hidden" name="end" value="{{ end }}" />
+    <input type="hidden" name="mode" value="{{ mode }}" />
+
+    <div class="pick-list">
+      {% for p in people %}
+      <label class="pick-item {{ 'disabled' if p.in_shift }}">
+        <input type="radio" name="user_id" value="{{ p.user.id }}" {{ 'disabled' if p.in_shift }} required />
+        <span class="strong">{{ p.user.name }}</span>
+        {% if p.available %}<span class="badge status-approved">available</span>
+        {% else %}<span class="badge status-rejected">not available</span>{% endif %}
+        {% if p.in_shift %}<span class="badge">on this shift</span>
+        {% elif p.busy_that_day %}<span class="badge status-issue_raised">has a duty that day</span>{% endif %}
+      </label>
+      {% else %}
+      <div class="empty">No active {{ role }}s.</div>
+      {% endfor %}
+    </div>
+    <div class="form-actions">
+      <a class="btn btn-ghost" href="{{ url_for('admin.allocate', start=start, end=end, mode=mode) }}">Cancel</a>
+      <button class="btn btn-primary">Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

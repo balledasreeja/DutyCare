@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% from "macros.html" import period_badge %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-value">{{ stats.doctors }}</div><div class="stat-label">Doctors</div></div>
+  <div class="stat-card"><div class="stat-value">{{ stats.nurses }}</div><div class="stat-label">Nurses</div></div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.shifts }}</div>
+    <div class="stat-label">Shifts (next 7 days)</div>
+    <div class="stat-hint">{{ stats.slots }} slots</div>
+  </div>
+  <div class="stat-card {{ 'good' if stats.slots and stats.coverage == 100 else 'warn' if stats.slots }}">
+    <div class="stat-value">{{ stats.coverage }}%</div>
+    <div class="stat-label">Coverage</div>
+    <div class="stat-hint">{{ stats.filled }} filled · {{ stats.published }} published</div>
+  </div>
+  <div class="stat-card {{ 'warn' if stats.open_requests }}">
+    <div class="stat-value">{{ stats.open_requests }}</div>
+    <div class="stat-label">Open requests</div>
+  </div>
+</div>
+
+<div class="quick-actions">
+  <a href="{{ url_for('admin.user_form') }}" class="btn btn-light">+ Add staff</a>
+  <a href="{{ url_for('admin.shift_bulk') }}" class="btn btn-light">+ Create shifts</a>
+  <a href="{{ url_for('admin.allocate') }}" class="btn btn-primary">Run allocation</a>
+</div>
+
+<div class="card">
+  <div class="card-head"><h2>Coverage, next 7 days</h2></div>
+  {% if not stats.week %}
+  <div class="empty">No shifts in the next 7 days. Create some on the Shifts page.</div>
+  {% else %}
+  <table class="table">
+    <thead>
+      <tr><th>Shift</th><th>Period</th><th>Needed</th><th>Assigned staff</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for r in stats.week %}
+      <tr>
+        <td>{{ r.shift.label }}</td>
+        <td>{{ period_badge(r.shift.period) }}</td>
+        <td>{{ r.shift.doctors_needed }} doc · {{ r.shift.nurses_needed }} nurse</td>
+        <td>
+          {% for a in r.doctors + r.nurses %}{{ a.user.name }}{{ ", " if not loop.last }}{% else %}<span class="muted">—</span>{% endfor %}
+        </td>
+        <td>
+          <span class="badge {{ 'status-approved' if r.filled >= r.needed else 'status-rejected' }}">{{ r.filled }}/{{ r.needed }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

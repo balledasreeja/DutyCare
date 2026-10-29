@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% from "macros.html" import role_badge, status_badge %}
+{% block title %}Requests{% endblock %}
+
+{% block content %}
+{% set TYPES = {"swap": "Swap", "leave": "Leave", "issue": "Issue"} %}
+<div class="card">
+  <div class="card-head">
+    <div class="segmented">
+      {% for s in ["open", "approved", "rejected", "all"] %}
+      <a class="{{ 'active' if status == s }}" href="{{ url_for('admin.requests', status=s) }}">
+        {{ s|capitalize }}{% if s == "open" and open_count %}<span class="count">{{ open_count }}</span>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  <table class="table">
+    <thead>
+      <tr><th>Received</th><th>Staff</th><th>Type</th><th>Duty</th><th>Message</th><th>Status</th><th class="right">Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for r in requests %}
+      <tr>
+        <td class="nowrap">{{ r.created_at|when }}</td>
+        <td><div class="strong">{{ r.user.name }}</div>{{ role_badge(r.user.role) }}</td>
+        <td>{{ TYPES[r.type] }}</td>
+        <td>{{ r.shift.label if r.shift else "General" }}</td>
+        <td class="message-cell">
+          {{ r.message or "—" }}
+          {% if r.admin_note %}<div class="admin-note">Admin: {{ r.admin_note }}</div>{% endif %}
+        </td>
+        <td>{{ status_badge(r.status) }}</td>
+        <td class="right nowrap actions">
+          {% if r.status == "open" %}
+          <a class="btn btn-primary btn-sm" href="{{ url_for('admin.decide', request_id=r.id, decision='approved') }}">Approve</a>
+          <a class="btn btn-danger-light btn-sm" href="{{ url_for('admin.decide', request_id=r.id, decision='rejected') }}">Reject</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="empty">No {{ "" if status == "all" else status }} requests.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

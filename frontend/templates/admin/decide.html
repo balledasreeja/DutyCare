@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}{{ "Approve" if decision == "approved" else "Reject" }} request{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+  <div class="card-head"><h2>{{ req.user.name }} · {{ req.type|capitalize }} request</h2></div>
+  <div class="pad">
+    <p><strong>Duty:</strong> {{ req.shift.label if req.shift else "General request" }}</p>
+    <p><strong>Message:</strong> {{ req.message or "—" }}</p>
+    {% if decision == "approved" and req.assignment_id %}
+    <div class="notice notice-info">
+      Approving releases {{ req.user.name }} from this duty, removes their availability for it, and gives the slot
+      to the next available colleague who is free that day (if there is one).
+    </div>
+    {% endif %}
+    <form method="post">
+      <input type="hidden" name="decision" value="{{ decision }}" />
+      <label class="field">
+        <span>Note to staff member (optional)</span>
+        <textarea name="note" rows="3"></textarea>
+      </label>
+      <div class="form-actions">
+        <a class="btn btn-ghost" href="{{ url_for('admin.requests') }}">Cancel</a>
+        <button class="btn {{ 'btn-primary' if decision == 'approved' else 'btn-danger' }}">
+          {{ "Approve" if decision == "approved" else "Reject" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+.venv/
+.env
+.env.*
+backend/.secret_key
+__pycache__/
+.pytest_cache/
+.vercel/
+*.db

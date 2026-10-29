@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" role="img" aria-label="DutyCare">
+  <path d="M32 3 L55 11 V29 C55 44.5 45.5 55 32 61 C18.5 55 9 44.5 9 29 V11 Z" fill="#1F3A5F"/>
+  <rect x="27" y="14" width="10" height="30" rx="2.5" fill="#FFFFFF"/>
+  <rect x="17" y="24" width="30" height="10" rx="2.5" fill="#FFFFFF"/>
+  <circle cx="47" cy="47" r="12" fill="#0E7C86" stroke="#FFFFFF" stroke-width="3"/>
+  <path d="M41.5 47.5 L45.5 51.5 L53 43.5" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="72" y="42" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="32" font-weight="700">
+    <tspan fill="#1F3A5F">Duty</tspan><tspan fill="#0E7C86">Care</tspan>
+  </text>
+</svg>

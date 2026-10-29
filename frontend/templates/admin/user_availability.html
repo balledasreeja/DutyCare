@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% from "macros.html" import date_range, availability_grid, role_badge %}
+{% block title %}Availability · {{ person.name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-head">
+    {{ date_range(start, end) }}
+    <div class="toolbar">{{ role_badge(person.role) }} <span class="muted">{{ person.department }}</span></div>
+  </div>
+  <p class="muted small pad">
+    Tick every shift {{ person.name }} can work. Each ticked shift becomes an edge in the allocation graph.
+  </p>
+  <form method="post">
+    <input type="hidden" name="start" value="{{ start }}" />
+    <input type="hidden" name="end" value="{{ end }}" />
+    {{ availability_grid(grid, periods) }}
+    <div class="form-actions pad-all">
+      <a class="btn btn-ghost" href="{{ url_for('admin.users') }}">Back to users</a>
+      <button class="btn btn-primary">Save availability</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
