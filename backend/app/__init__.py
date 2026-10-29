@@ -70,11 +70,19 @@ def ensure_admin() -> bool:
         return True
 
 
+TEMPLATE_FOLDER = str(FRONTEND / "templates")
+STATIC_FOLDER = str(FRONTEND / "static")
+
+
 def create_app() -> Flask:
+    return init_app(Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER))
+
+
+def init_app(app: Flask) -> Flask:
+    """Set up the database, pages and settings on an existing Flask app."""
     if engine is None:
         raise RuntimeError("DATABASE_URL is not set. Put your Neon connection string in .env "
                            "(locally) or in the Vercel project's Environment Variables.")
-    app = Flask(__name__, template_folder=str(FRONTEND / "templates"), static_folder=str(FRONTEND / "static"))
     app.secret_key = _secret_key()
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 

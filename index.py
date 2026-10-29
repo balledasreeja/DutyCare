@@ -3,21 +3,22 @@ import sys
 import traceback
 from pathlib import Path
 
+from flask import Flask
 from markupsafe import escape
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "backend"))
 
-try:
-    from app import create_app
+from app import STATIC_FOLDER, TEMPLATE_FOLDER, init_app  # noqa: E402
 
-    app = create_app()
+# Vercel's build looks for a top-level Flask instance named `app`, so create it here.
+app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
+
+try:
+    init_app(app)
 except Exception as exc:  # show why startup failed instead of Vercel's generic 500 page
     traceback.print_exc()  # full details go to Vercel's Runtime Logs
-    from flask import Flask
-
     # Our own RuntimeErrors are setup instructions; other errors may contain connection details, so hide them.
     reason = str(exc) if isinstance(exc, RuntimeError) else f"{type(exc).__name__}. Details are in Vercel's Runtime Logs."
-    app = Flask(__name__)
 
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
