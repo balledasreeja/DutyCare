@@ -136,8 +136,8 @@ These examples are checked automatically by the test suite (`backend/tests/test_
 ```
 DutyCare/
 ├── run.py                  # one-command local launcher
-├── api/index.py            # Vercel entry point
-├── vercel.json             # Vercel configuration
+├── index.py                # Vercel entry point (exposes the Flask app)
+├── vercel.json             # Vercel settings (runs in Singapore, next to the database)
 ├── requirements.txt        # runtime packages
 ├── requirements-dev.txt    # + pytest
 ├── backend/
@@ -199,7 +199,7 @@ To create the first admin with your own details instead, set `DUTYCARE_ADMIN_EMA
    | `DATABASE_URL` | Your Neon connection string (the pooled one, with `-pooler` in the host) |
    | `DUTYCARE_SECRET` | A long random string, e.g. the output of `python -c "import secrets; print(secrets.token_hex(32))"` |
 
-3. Deploy. `vercel.json` routes every request to the Flask app in `api/index.py`.
+3. Deploy. Vercel detects `index.py` and routes every request to the Flask app.
 
 ---
 

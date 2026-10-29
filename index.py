@@ -1,11 +1,11 @@
-"""Vercel entry point: exposes the Flask app as a serverless function."""
+"""Vercel entry point. Vercel detects index.py at the project root and routes every request to `app`."""
 import sys
 import traceback
 from pathlib import Path
 
 from markupsafe import escape
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "backend"))
+sys.path.insert(0, str(Path(__file__).resolve().parent / "backend"))
 
 try:
     from app import create_app
