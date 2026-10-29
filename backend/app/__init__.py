@@ -105,10 +105,13 @@ def init_app(app: Flask) -> Flask:
 
     @app.context_processor
     def layout_context():
+        from .services import notifications
+
         user = g.get("user")
         links = [] if user is None else ADMIN_LINKS if user.role == "admin" else STAFF_LINKS
         return {
             "current_user": user,
+            "notifications": notifications(g.db, user) if user is not None else [],
             "nav_links": links,
             "active_nav": NAV_PARENT.get(request.endpoint, request.endpoint),
             "area": "Admin Panel" if user is not None and user.role == "admin" else "Staff Portal",

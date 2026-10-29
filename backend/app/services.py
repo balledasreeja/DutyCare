@@ -1,5 +1,5 @@
 """Business logic for DutyCare. Views call these functions; they raise ServiceError for user mistakes."""
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
@@ -431,6 +431,58 @@ def stats(db: Session) -> dict:
         "open_requests": db.scalar(select(func.count()).select_from(Request).where(Request.status == "open")),
         "week": week,
     }
+
+
+# ---------------------------------------------------------------- notifications
+
+REQUEST_TYPE_TEXT = {"swap": "swap", "leave": "leave", "issue": "issue"}
+
+
+def notifications(db: Session, user: User, limit: int = 8) -> list[dict]:
+    """Items for the bell menu: what needs this user's attention right now."""
+    items = []
+    if user.role == "admin":
+        open_requests = db.scalars(
+            select(Request).where(Request.status == "open").order_by(Request.created_at.desc()).limit(limit)
+        ).all()
+        for r in open_requests:
+            items.append({
+                "title": f"{r.user.name} requested {REQUEST_TYPE_TEXT[r.type]}",
+                "detail": r.shift.label if r.shift else (r.message or "General request"),
+                "when": r.created_at,
+                "endpoint": "admin.requests",
+                "kind": "request",
+            })
+        return items
+
+    today = date.today()
+    pending = db.scalars(
+        select(Assignment).join(Shift)
+        .where(Assignment.user_id == user.id, Assignment.published.is_(True),
+               Assignment.status == "assigned", Shift.date >= today)
+    ).all()
+    for a in sorted(pending, key=lambda a: a.shift.sort_key):
+        items.append({
+            "title": "New duty: please accept",
+            "detail": a.shift.label,
+            "when": None,
+            "endpoint": "staff.duties",
+            "kind": "duty",
+        })
+    decided = db.scalars(
+        select(Request).where(Request.user_id == user.id, Request.status != "open",
+                              Request.created_at >= datetime.now() - timedelta(days=14))
+        .order_by(Request.created_at.desc())
+    ).all()
+    for r in decided:
+        items.append({
+            "title": f"Your {REQUEST_TYPE_TEXT[r.type]} request was {r.status}",
+            "detail": r.admin_note.splitlines()[0] if r.admin_note else (r.shift.label if r.shift else ""),
+            "when": r.created_at,
+            "endpoint": "staff.requests",
+            "kind": r.status,
+        })
+    return items[:limit]
 
 
 # ---------------------------------------------------------------- helpers

@@ -16,22 +16,50 @@
       </a>
       {% endfor %}
     </nav>
+    <div class="sidebar-user" title="{{ current_user.email }}">
+      <div class="avatar">{{ current_user.name|initials }}</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">{{ current_user.name }}</div>
+        {{ role_badge(current_user.role) }}
+      </div>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <button class="sidebar-logout" title="Log out" aria-label="Log out">{{ icon("log-out", 18) }}</button>
+      </form>
+    </div>
   </aside>
 
   <div class="main">
     <header class="topbar">
       <h1>{{ self.title() }}</h1>
       <div class="topbar-right">
-        <div class="profile" title="{{ current_user.email }}">
-          <div class="avatar">{{ current_user.name|initials }}</div>
-          <div class="profile-info">
-            <div class="profile-name">{{ current_user.name }}</div>
-            {{ role_badge(current_user.role) }}
+        {# Click-to-open notification window; <details> opens and closes without JavaScript. #}
+        <details class="notif">
+          <summary class="notif-bell" aria-label="Notifications">
+            {{ icon("bell", 20) }}
+            {% if notifications %}<span class="notif-count">{{ notifications|length }}</span>{% endif %}
+          </summary>
+          <div class="notif-panel">
+            <div class="notif-head">
+              <span>Notifications</span>
+              {% if notifications %}<span class="muted small">{{ notifications|length }} new</span>{% endif %}
+            </div>
+            {% for n in notifications %}
+            <a class="notif-item" href="{{ url_for(n.endpoint) }}">
+              <span class="notif-dot dot-{{ n.kind }}"></span>
+              <span class="notif-text">
+                <span class="notif-title">{{ n.title }}</span>
+                {% if n.detail %}<span class="notif-detail">{{ n.detail }}</span>{% endif %}
+                {% if n.when %}<span class="notif-when">{{ n.when|when }}</span>{% endif %}
+              </span>
+            </a>
+            {% else %}
+            <div class="notif-empty">
+              {{ icon("bell-off", 28) }}
+              <span>You're all caught up</span>
+            </div>
+            {% endfor %}
           </div>
-        </div>
-        <form method="post" action="{{ url_for('auth.logout') }}">
-          <button class="btn btn-ghost logout-btn" title="Log out">{{ icon("log-out", 18) }}<span>Log out</span></button>
-        </form>
+        </details>
       </div>
     </header>
     <main class="content">
