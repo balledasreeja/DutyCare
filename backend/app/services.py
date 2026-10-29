@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from .matching import ROLE_CODE, ROLE_NEEDED, run_allocation
 from .models import PERIODS, ROLES, STAFF_ROLES, Assignment, Availability, Request, Shift, User
-from .security import hash_password
+from .security import hash_password, verify_password
 
 
 class ServiceError(Exception):
@@ -79,6 +79,34 @@ def delete_user(db: Session, user_id: int, acting: User) -> str:
     db.delete(user)
     db.commit()
     return name
+
+
+def update_own_profile(db: Session, user: User, form: dict) -> User:
+    """Settings page: everyone may change their phone; admins may also change their own name and email."""
+    if user.role == "admin":
+        name = form.get("name", "").strip()
+        email = form.get("email", "").strip().lower()
+        if not name or "@" not in email:
+            raise ServiceError("Name and a valid email are required")
+        if db.scalar(select(User.id).where(User.email == email, User.id != user.id)):
+            raise ServiceError("A user with this email already exists")
+        user.name, user.email = name, email
+    user.phone = form.get("phone", "").strip()
+    db.commit()
+    return user
+
+
+def change_own_password(db: Session, user: User, current: str, new: str, confirm: str):
+    if not verify_password(current, user.password_hash):
+        raise ServiceError("Your current password is not correct")
+    if len(new) < 6:
+        raise ServiceError("The new password must be at least 6 characters")
+    if new != confirm:
+        raise ServiceError("The new password and its confirmation do not match")
+    if new == current:
+        raise ServiceError("The new password must be different from the current one")
+    user.password_hash = hash_password(new)
+    db.commit()
 
 
 def staff_member(db: Session, user_id: int) -> User:

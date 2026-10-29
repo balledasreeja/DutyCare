@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% from "macros.html" import role_badge %}
+{% from "icons.html" import icon %}
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+{% set is_admin = current_user.role == "admin" %}
+<div class="settings-grid">
+
+  <section class="card">
+    <div class="card-head settings-head">
+      <span class="settings-icon">{{ icon("user-round", 20) }}</span>
+      <div>
+        <h2>Profile</h2>
+        <p class="muted small">
+          {% if is_admin %}Your name, email and phone number.
+          {% else %}Your details. Ask the administrator to change your name, email or department.{% endif %}
+        </p>
+      </div>
+    </div>
+    <form method="post" class="settings-body">
+      <input type="hidden" name="section" value="profile" />
+      <div class="settings-summary">
+        <div class="avatar avatar-lg">{{ current_user.name|initials }}</div>
+        <div>
+          <div class="strong">{{ current_user.name }}</div>
+          {{ role_badge(current_user.role) }}
+        </div>
+      </div>
+      <label class="field">
+        <span>Full name</span>
+        <input name="name" value="{{ current_user.name }}" {{ 'required' if is_admin else 'disabled' }} />
+      </label>
+      <label class="field">
+        <span>Email (used to log in)</span>
+        <input type="email" name="email" value="{{ current_user.email }}" {{ 'required' if is_admin else 'disabled' }} />
+      </label>
+      {% if not is_admin %}
+      <label class="field">
+        <span>Department</span>
+        <input value="{{ current_user.department or '—' }}" disabled />
+      </label>
+      {% endif %}
+      <label class="field">
+        <span>Phone</span>
+        <input name="phone" value="{{ current_user.phone }}" placeholder="e.g. +91 98765 43210" />
+      </label>
+      <div class="form-actions">
+        <button class="btn btn-primary">Save profile</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-head settings-head">
+      <span class="settings-icon">{{ icon("key-round", 20) }}</span>
+      <div>
+        <h2>Change password</h2>
+        <p class="muted small">Use at least 6 characters. You stay logged in after changing it.</p>
+      </div>
+    </div>
+    <form method="post" class="settings-body">
+      <input type="hidden" name="section" value="password" />
+      <label class="field">
+        <span>Current password</span>
+        <input type="password" name="current" autocomplete="current-password" required />
+      </label>
+      <label class="field">
+        <span>New password</span>
+        <input type="password" name="new" minlength="6" autocomplete="new-password" required />
+      </label>
+      <label class="field">
+        <span>Confirm new password</span>
+        <input type="password" name="confirm" minlength="6" autocomplete="new-password" required />
+      </label>
+      <div class="form-actions">
+        <button class="btn btn-primary">Change password</button>
+      </div>
+    </form>
+  </section>
+
+</div>
+{% endblock %}

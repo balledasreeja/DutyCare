@@ -20,11 +20,13 @@ ADMIN_LINKS = [
     ("admin.shifts", "Shifts", "calendar-days"),
     ("admin.allocate", "Allocate Duties", "arrow-left-right"),
     ("admin.requests", "Requests", "inbox"),
+    ("account.settings", "Settings", "settings"),
 ]
 STAFF_LINKS = [
     ("staff.duties", "My Duties", "stethoscope"),
     ("staff.availability", "Availability", "calendar-check"),
     ("staff.requests", "My Requests", "message-square"),
+    ("account.settings", "Settings", "settings"),
 ]
 # Which sidebar entry is highlighted for each page (sub-pages map to their parent).
 NAV_PARENT = {
@@ -131,8 +133,9 @@ def init_app(app: Flask) -> Flask:
             name = name.removeprefix(prefix)
         return name[:2].upper()
 
-    from .views import admin, auth, staff
+    from .views import account, admin, auth, staff
     app.register_blueprint(auth.bp)
+    app.register_blueprint(account.bp)
     app.register_blueprint(admin.bp)
     app.register_blueprint(staff.bp)
 
