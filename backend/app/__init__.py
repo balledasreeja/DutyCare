@@ -13,17 +13,18 @@ from .security import hash_password, home_endpoint
 ROOT = Path(__file__).resolve().parents[2]
 FRONTEND = ROOT / "frontend"
 
+# (endpoint, label, icon name from frontend/templates/icons.html)
 ADMIN_LINKS = [
-    ("admin.dashboard", "Dashboard", "▦"),
-    ("admin.users", "Users", "👥"),
-    ("admin.shifts", "Shifts", "🗓"),
-    ("admin.allocate", "Allocate Duties", "⇄"),
-    ("admin.requests", "Requests", "✉"),
+    ("admin.dashboard", "Dashboard", "layout-dashboard"),
+    ("admin.users", "Users", "users"),
+    ("admin.shifts", "Shifts", "calendar-days"),
+    ("admin.allocate", "Allocate Duties", "arrow-left-right"),
+    ("admin.requests", "Requests", "inbox"),
 ]
 STAFF_LINKS = [
-    ("staff.duties", "My Duties", "🩺"),
-    ("staff.availability", "Availability", "🗓"),
-    ("staff.requests", "My Requests", "✉"),
+    ("staff.duties", "My Duties", "stethoscope"),
+    ("staff.availability", "Availability", "calendar-check"),
+    ("staff.requests", "My Requests", "message-square"),
 ]
 # Which sidebar entry is highlighted for each page (sub-pages map to their parent).
 NAV_PARENT = {

@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from "icons.html" import icon %}
 {% from "macros.html" import status_badge %}
 {% block title %}My Requests{% endblock %}
 
@@ -7,7 +8,7 @@
 <div class="card">
   <div class="card-head">
     <h2>Your requests</h2>
-    <a class="btn btn-primary" href="{{ url_for('staff.new_request') }}">+ New request</a>
+    <a class="btn btn-primary" href="{{ url_for('staff.new_request') }}">{{ icon("plus", 16) }} New request</a>
   </div>
   <table class="table">
     <thead>

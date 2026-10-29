@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% from "macros.html" import period_badge, status_badge, keep_range %}
+{% from "icons.html" import icon %}
 {% block title %}Allocate Duties{% endblock %}
 
 {% block content %}
@@ -18,7 +19,7 @@
       </label>
       <button class="btn btn-light" formmethod="get" formaction="{{ url_for('admin.allocate') }}">Show roster</button>
     </div>
-    <button class="btn btn-primary">⇄ Run allocation</button>
+    <button class="btn btn-primary">{{ icon("play", 16) }} Run allocation</button>
   </form>
   <p class="muted small pad">
     Uses Kuhn's augmenting-path algorithm on the staff/shift bipartite graph, separately for doctors and nurses.
@@ -80,7 +81,7 @@
     <form method="post" action="{{ url_for('admin.allocate_publish') }}" class="toolbar">
       {{ keep_range(start, end, mode) }}
       {% if drafts %}<span class="muted">{{ drafts }} draft assignment(s) not yet visible to staff</span>{% endif %}
-      <button class="btn btn-accent" {{ 'disabled' if not drafts }}>Publish roster</button>
+      <button class="btn btn-accent" {{ 'disabled' if not drafts }}>{{ icon("send", 16) }} Publish roster</button>
     </form>
   </div>
 

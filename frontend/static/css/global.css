@@ -87,6 +87,7 @@ a {
   transition: background 0.15s, border-color 0.15s, opacity 0.15s;
 }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.icon { flex-shrink: 0; display: block; }
 .btn + .btn { margin-left: 6px; }
 form { margin: 0; }
 .btn-primary { background: var(--navy); color: #fff; }

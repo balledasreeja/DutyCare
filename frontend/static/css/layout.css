@@ -35,7 +35,7 @@
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 10px 12px;
   border-radius: 8px;
   color: #cbd5e1;
@@ -43,19 +43,21 @@
   font-weight: 500;
 }
 .nav-link:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.nav-link:hover .nav-icon { color: #fff; }
 .nav-link.active {
   background: rgba(14, 124, 134, 0.35);
   color: #fff;
   box-shadow: inset 3px 0 0 #5fd3dc;
 }
-.nav-icon { width: 20px; text-align: center; }
-.sidebar-user {
-  display: flex;
+.nav-icon {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  justify-content: center;
+  width: 22px;
+  color: #8fb3c9;
+  transition: color 0.15s;
 }
+.nav-link.active .nav-icon { color: #5fd3dc; }
 .avatar {
   width: 36px;
   height: 36px;
@@ -68,7 +70,6 @@
   font-size: 13px;
   flex-shrink: 0;
 }
-.sidebar-user-name { color: #fff; font-weight: 600; font-size: 13px; }
 
 .main {
   flex: 1;
@@ -85,7 +86,21 @@
   border-bottom: 1px solid var(--border);
 }
 .topbar h1 { font-size: 21px; }
-.topbar-right { display: flex; align-items: center; gap: 14px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 14px 5px 5px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #f8fafc;
+}
+.profile-info { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; gap: 2px; }
+.profile-name { font-weight: 600; font-size: 13px; color: var(--navy); }
+.profile .badge { font-size: 10.5px; padding: 0 7px; }
+.logout-btn { padding: 8px 12px; }
+.logout-btn:hover { color: var(--red); background: var(--red-light); }
 .content { padding: 26px 32px 48px; }
 
 /* ---------- Cards ---------- */
@@ -287,6 +302,8 @@
 .past summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--navy); }
 
 @media (max-width: 900px) {
+  .profile-info, .logout-btn span { display: none; }
+  .profile { padding: 4px; }
   .shell { flex-direction: column; }
   .sidebar { width: 100%; height: auto; position: static; }
   .sidebar-nav { flex-direction: row; flex-wrap: wrap; }

@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from "icons.html" import icon %}
 {% from "macros.html" import date_range, period_badge %}
 {% block title %}Shifts{% endblock %}
 
@@ -8,7 +9,7 @@
     {{ date_range(start, end) }}
     <div class="toolbar">
       <a class="btn btn-light" href="{{ url_for('admin.shift_bulk') }}">Create for date range</a>
-      <a class="btn btn-primary" href="{{ url_for('admin.shift_form') }}">+ Add shift</a>
+      <a class="btn btn-primary" href="{{ url_for('admin.shift_form') }}">{{ icon("plus", 16) }} Add shift</a>
     </div>
   </div>
 

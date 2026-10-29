@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from "icons.html" import icon %}
 {% from "macros.html" import role_badge %}
 {% block title %}Users{% endblock %}
 
@@ -16,7 +17,7 @@
         <a class="{{ 'active' if role == r }}" href="{{ url_for('admin.users', role=r, q=q or None) }}">{{ label }}</a>
         {% endfor %}
       </div>
-      <a class="btn btn-primary" href="{{ url_for('admin.user_form') }}">+ Add user</a>
+      <a class="btn btn-primary" href="{{ url_for('admin.user_form') }}">{{ icon("plus", 16) }} Add user</a>
     </div>
   </div>
 

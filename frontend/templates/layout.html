@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "macros.html" import logo, role_badge, flashes %}
+{% from "icons.html" import icon %}
 
 {% block body %}
 <div class="shell">
@@ -9,28 +10,27 @@
       <div class="sidebar-area">{{ area }}</div>
     </div>
     <nav class="sidebar-nav">
-      {% for endpoint, label, icon in nav_links %}
+      {% for endpoint, label, icon_name in nav_links %}
       <a href="{{ url_for(endpoint) }}" class="nav-link {{ 'active' if active_nav == endpoint }}">
-        <span class="nav-icon">{{ icon }}</span>{{ label }}
+        <span class="nav-icon">{{ icon(icon_name) }}</span>{{ label }}
       </a>
       {% endfor %}
     </nav>
-    <div class="sidebar-user">
-      <div class="avatar">{{ current_user.name|initials }}</div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name">{{ current_user.name }}</div>
-        {{ role_badge(current_user.role) }}
-      </div>
-    </div>
   </aside>
 
   <div class="main">
     <header class="topbar">
       <h1>{{ self.title() }}</h1>
       <div class="topbar-right">
-        <span class="muted">{{ current_user.email }}</span>
+        <div class="profile" title="{{ current_user.email }}">
+          <div class="avatar">{{ current_user.name|initials }}</div>
+          <div class="profile-info">
+            <div class="profile-name">{{ current_user.name }}</div>
+            {{ role_badge(current_user.role) }}
+          </div>
+        </div>
         <form method="post" action="{{ url_for('auth.logout') }}">
-          <button class="btn btn-ghost">Log out</button>
+          <button class="btn btn-ghost logout-btn" title="Log out">{{ icon("log-out", 18) }}<span>Log out</span></button>
         </form>
       </div>
     </header>
